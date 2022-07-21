@@ -1,8 +1,21 @@
-  <div style="background-color:gray;">
-        <h3>장고(Django) + MariaDB 게시판</h3>
-        <ul style="display: flex;">
-            <li style="list-style:none; margin-right: 10px"><button>HOME</button></li>
-            <li style="list-style:none; margin-right: 10px"><button onclick="testFucntion()">Call function</button></li>
-            <li style="list-style:none; margin-right: 10px"><a href="http://knu.abcyo.kr" target="_blank"><button>COP</button></a></li>
+  <!-- ======= Header ======= -->
+  <header id="header" class="fixed-top d-flex align-items-center">
+    <div class="container d-flex align-items-center justify-content-between">
+
+      <div class="logo">
+        <h1><a href="home.html">장고 게시판</a></h1>
+        <!-- Uncomment below if you prefer to use an image logo -->
+        <!-- <a href="index.html"><img src="assets/img/logo.png" alt="" class="img-fluid"></a>-->
+      </div>
+
+      <nav id="navbar" class="navbar">
+        <ul>
+          <li><a class="nav-link scrollto active" href="/">Home</a></li>
+          <li><a class="nav-link scrollto" href="#" onclick="testFucntion()">Call function</a></li>
+          <li><a class="nav-link scrollto" href="http://knu.abcyo.kr" target="_blank">COP</a></li>
         </ul>
+        <i class="bi bi-list mobile-nav-toggle"></i>
+      </nav><!-- .navbar -->
+
     </div>
+  </header><!-- End Header -->
