@@ -273,7 +273,20 @@ def userRoute(userid):
 
     set_walking_data(route, user_data['walking'])
 
+
     set_bus_data(route[1], route[2], user_data['bus'])
+    bus_path = []
+    for bp in user_data['bus']['path']:
+        bus_path.extend(bp)
+    user_data['bus']['path'] = bus_path
+
+    for i, path in enumerate(user_data['walking']['path']):
+        walk_path = []
+
+        for p in path:
+            walk_path.extend(p)
+        
+        user_data['walking']['path'][i] = walk_path
     # { 도보 정보 :
     #   { 입력 지점(위도&경도) : [출발지, 탑승지, 하차지, 목적지]
     #     경로(위도&경도) : [[출발지-탑승지], [하차지-목적지]], (경로 그리기 좌표)
@@ -311,7 +324,11 @@ def set_driver_data(start, viapoints, end, dic):
 
 # 운전자의 경로를 반환
 @csrf_exempt
-def driverRoute():
+def driverRoute(driver_data):
+    path = []
+    for p in driver_data['path']:
+        path.extend(p)
+    driver_data['path'] = path
     return HttpResponse(dumps(driver_data))
 
 
@@ -360,7 +377,7 @@ def getRoute(request):
     if user_type == "passenger":
         return userRoute(userid)
     else:
-        return driverRoute()
+        return driverRoute(driver_data)
 
 
 def GetSpotPoint(request):

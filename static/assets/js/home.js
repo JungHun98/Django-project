@@ -131,7 +131,7 @@ output.onclick = function () {
             if (extraRoadAddr !== '') {
                 extraRoadAddr = ' (' + extraRoadAddr + ')';
             }
-             endcode= data.sigunguCode;
+            endcode= data.sigunguCode;
             //set value 도로명 주소
             document.getElementById("EndAddr").value = roadAddr;
         }

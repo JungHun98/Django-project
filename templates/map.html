@@ -181,7 +181,7 @@
             let markPoints = [];
 
             fetch("/getRoute", {
-                method: "POST",
+                method: "GET",
             }).then(function (data) {
                 data.text().then((text) => {
 
@@ -203,9 +203,9 @@
                         setViaPoint(route_info.bus.viaPoints);
 
                         userPassengerPath.forEach((route) => {
-                            drawRoute(route, "#ff0000");
+                            // drawRoute(route, "#ff0000");
                         });
-                        drawRoute(userBusRoute, "#229c9e");
+                        // drawRoute(userBusRoute, "#229c9e");
                         let userBusTime = route_info.bus.time.reduce((a, b) => a + b, 0);
                         let userBusDistance = route_info.bus.distance.reduce((a, b) => a + b, 0);
 
@@ -219,7 +219,7 @@
                         arr = route_info.viaPoints;
                         setMarker(route_info.viaPoints);
 
-                        drawRoute(driverPath, "#229c9e");
+                        // drawRoute(driverPath, "#229c9e");
                         showPoint(route_info.viaPoints, route_info.time, route_info.distance);
                         cal_center(route_info.viaPoints);
                     }
@@ -308,7 +308,6 @@
         let hour = dateString.slice(0, 2);
         let min = dateString.slice(3);
         let timeString;
-
 
         if (min[0] == '0') {
             min = min[1];
