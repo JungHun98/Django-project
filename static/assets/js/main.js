@@ -1,5 +1,5 @@
 /**
-* Template Name: Vesperr - v4.8.0
+* Template Name: Vesperr - v4.7.0
 * Template URL: https://bootstrapmade.com/vesperr-free-bootstrap-template/
 * Author: BootstrapMade.com
 * License: https://bootstrapmade.com/license/
