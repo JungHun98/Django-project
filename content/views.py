@@ -287,6 +287,7 @@ def userRoute(userid):
             walk_path.extend(p)
         
         user_data['walking']['path'][i] = walk_path
+
     # { 도보 정보 :
     #   { 입력 지점(위도&경도) : [출발지, 탑승지, 하차지, 목적지]
     #     경로(위도&경도) : [[출발지-탑승지], [하차지-목적지]], (경로 그리기 좌표)
