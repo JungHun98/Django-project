@@ -1,5 +1,7 @@
 "use strict"
-
+/**
+ * @todo 경유지에서 출발지, 도착지 결정 알고리즘(TSP 사용하기)
+ */
 let map;
 let marker;
 let markerIfo;
@@ -23,8 +25,10 @@ try {
 
 
 /* 길찾기 버튼 클릭 이벤트 */
+
 const searchRouteButton = document.querySelector("#btn_select");
 searchRouteButton.addEventListener('click', (event) => {
+
   let routeInfo;
   let busPath;
   let markers;
@@ -37,14 +41,20 @@ searchRouteButton.addEventListener('click', (event) => {
     .then(response => response.text())
     .then((text) => {
       // 경로 그리기,마커 찍기, 지도 영역 설정
-      try{
+      try {
         routeInfo = JSON.parse(text);
-      } catch(e){
+      } catch (e) {
         window.location.href = text;
       }
       login = true;
 
       if (routeInfo.walking) {
+        let busTime = routeInfo.bus.time.reduce((a,b) => a+b, 0);
+        let busDistance = routeInfo.bus.distance.reduce((a,b) => a+b, 0);
+
+        routeInfo.walking.time.splice(1,0,busTime);
+        routeInfo.walking.distance.splice(1,0,busDistance);
+
         markers = JSON.parse(JSON.stringify(routeInfo.walking.points)); // 출발지-탑승지
         markers.splice(2, 0, ...routeInfo.bus.viaPoints); // 출발지 - 지나는 버스정류장 - 도착지
 
@@ -56,6 +66,7 @@ searchRouteButton.addEventListener('click', (event) => {
         busPath = routeInfo.bus.path;
         boundPoints = routeInfo.walking.points;
 
+        // point, time, distance
         routeInfoArr.push(routeInfo.walking.points);
         routeInfoArr.push(routeInfo.walking.time);
         routeInfoArr.push(routeInfo.walking.distance);
@@ -70,22 +81,40 @@ searchRouteButton.addEventListener('click', (event) => {
         routeInfoArr.push(routeInfo.distance);
       }
 
+      // 중복제거
+      // route 객체를 하나로 만들기, 조건문 불필요
+      // view에서 데이터 포맷 변환, 통합해서 사용 할 수 있을듯 함
+
       console.log(routeInfo);
 
+      // updateMap(busPath, markers, boundPoints);
       drawRoute(busPath, "#229c9e");
       setMarker(markers);
       setMapBound(boundPoints);
 
       return routeInfoArr
     })
-    .then(
-      console.log
+    .then((routeInfoArr) =>{
+      createRouteInfoWindow(routeInfoArr[0], routeInfoArr[1], routeInfoArr[2])
+    }
       // showPoint
       // 경로 인터페이스 출력
     )
     .catch(console.log) // JSON데이터가 아닌 경우
     .finally();
 });
+
+/**
+ * 매개변수를 바탕으로 지도를 업데이트하는 함수
+ * @param {Array} path 좌표배열 
+ * @param {Array} markers 마커좌표배열
+ * @param {Array} points 지도영역위치
+ */
+function updateMap(path, markers, points) {
+  drawRoute(path, "#229c9e");
+  setMarker(markers);
+  setMapBound(points);
+}
 
 /** 
  * 마커 찍기 함수 
@@ -142,8 +171,8 @@ function drawRoute(path, color) {
 
   resultdrawArr.push(routeLine);
   // 속도 개선 됨 왜???
-  // 서버에서 fetch 속도가 그렇게 빨라진것은 아니다.
-  // but 이전 버전에서는 polyLine 객체의 개수가 지나치게 많은 것이 원인이었던 것 같다.
+  // 서버에서 fetch 속도가 빨라진것은 아니다.
+  // but 이전 버전에서는 polyLine 인스턴스 개수가 지나치게 많은 것이 원인이었던 것 같다.
   // 확인해 보니까 1600개의 인스턴스가 지도에 그려졌다;;;;
 }
 
@@ -189,9 +218,104 @@ function setMapBound(points) {
   bounds.extend(new Tmapv2.LatLng(centerLat - boundX, centerLon));
   bounds.extend(new Tmapv2.LatLng(centerLat, centerLon + boundY));
   bounds.extend(new Tmapv2.LatLng(centerLat, centerLon - boundY));
-  
+
   map.fitBounds(bounds, 70);
 }
+
+/**
+ * 경로의 정보(시간, 거리, 명칭)을 담고 있는 <li> 생성
+ * @param {Array} pointArray 
+ * @param {Array} timeArray 
+ * @param {Array} distanceArray
+ */
+function createRouteInfoWindow(pointArray, timeArray, distanceArray) {
+  let route_container = document.querySelector("#route_list");
+
+  // 기존 인터페이스 초기화
+  if (route_container.childNodes) {
+    route_container.innerHTML = '';
+  }
+
+  //forEach로 바꾸기
+  for (let i = 0; i < pointArray.length; i++) {
+    let route = document.createElement('li');
+    let textDiv = document.createElement('div');
+
+    route.setAttribute('class', 'route');
+    route.dataset.lat = pointArray[i].lat;
+    route.dataset.lon = pointArray[i].lon;
+
+    textDiv.innerHTML = pointArray[i].name;
+    route.appendChild(textDiv);
+
+    if (i < pointArray.length - 1) {
+      let time, distance;
+      let childDiv = document.createElement('div');
+
+      time = secToHHMMString(timeArray[i]);
+      distance = mToKmString(distanceArray[i]);
+      childDiv.innerHTML = time + " ↓ " + distance;
+
+      route.appendChild(childDiv);
+    } else {
+      let totalTime = secToHHMMString(timeArray.reduce((a, b) => a + b, 0));
+      let totalDistance = mToKmString(distanceArray.reduce((a, b) => a + b, 0));
+      let totalTextNode = document.createTextNode("총 시간: " + totalTime + ", 총 거리: " + totalDistance);
+
+      route_container.parentNode.appendChild(totalTextNode);
+    }
+
+    route.addEventListener('click', (event) => {
+      let coord = new Tmapv2.LatLng(route.dataset.lat, route.dataset.lon);
+      map.setCenter(coord);
+      map.setZoom(15);
+    });
+
+    route_container.appendChild(route);
+  }
+}
+
+/**
+ * 인자로 전달된 초 단위의 시간을 분, 시간 단위로 변환한 문자열을 반환하는 함수
+ * @param {number} sec 초
+ * @returns {string} 분/시간 단위 문자열
+*/
+function secToHHMMString(sec) {
+  let dateString = new Date(sec * 1000).toISOString().slice(11, 16);
+  let hour = dateString.slice(0, 2);
+  let min = dateString.slice(3);
+  let timeString;
+
+  if (min[0] == '0') {
+    min = min[1];
+  }
+
+  if (hour == '00') {
+    timeString = min + "분";
+  } else {
+    timeString = hour.slice(1) + "시간 " + min + "분";
+  }
+
+  return timeString;
+}
+
+/**
+ * 인자로 전달된 미터 단위의 거리를 미터, 키로미터 다위로 변환한 문자열을 반환하는 함수
+ * @param {number} sec 초
+ * @returns {string} m/km 단위 문자열
+*/
+function mToKmString(m) {
+  let km = m / 1000;
+  let distanceString;
+  if (km > 1) {
+    distanceString = km.toFixed(1) + " km";
+  } else {
+    distanceString = m + " m";
+  }
+
+  return distanceString;
+}
+
 /** 지도에 표시된 기존 마커들과 경로를 clear하는 함수 */
 function resettingMap() {
 

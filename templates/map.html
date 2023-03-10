@@ -129,14 +129,16 @@
     });
 
     
-
+    // createRouteInfoWindow
     function showPoint(pointArray, timeArray, distanceArray) {
         let route_container = document.querySelector("#route_list");
 
+        // 기존 인터페이스 초기화
         if (route_container.childNodes) {
             route_container.innerHTML = '';
         }
 
+        //forEach로 바꾸기
         for (let i = 0; i < pointArray.length; i++) {
             let route = document.createElement('li');
             let textDiv = document.createElement('div');
@@ -151,15 +153,17 @@
             if (i < pointArray.length - 1) {
                 let time, distance;
                 let childDiv = document.createElement('div');
+
                 time = secToHHMMString(timeArray[i]);
                 distance = mToKmString(distanceArray[i]);
-
                 childDiv.innerHTML = time + " ↓ " + distance;
+                
                 route.appendChild(childDiv);
             } else {
                 let totalTime = secToHHMMString(timeArray.reduce((a, b) => a + b, 0));
                 let totalDistance = mToKmString(distanceArray.reduce((a, b) => a + b, 0));
                 let totalTextNode = document.createTextNode("총 시간: " + totalTime + ", 총 거리: " + totalDistance);
+                
                 route_container.parentNode.appendChild(totalTextNode);
             }
 
