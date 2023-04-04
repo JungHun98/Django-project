@@ -238,7 +238,7 @@ function drawRoute(path, color) {
  * @param {Array} points GPS정보배열 
 */
 function setMapBound(points) {
-  debugger;
+  
   let maxLatLon = { 'lat': 0, 'lon': 0 };
   let minLatLon = { 'lat': 50, 'lon': 150 };
 
