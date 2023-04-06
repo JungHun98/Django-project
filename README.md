@@ -12,6 +12,8 @@
 ## 결과예시
 ![스크린샷 2023-01-27 오후 8 51 30](https://user-images.githubusercontent.com/81648520/215080342-fc085832-66c0-4893-94ee-2962f66e0f67.png)
 
+[구현 부분 영상](https://youtu.be/2uMvvIf_i0A)
+
 ## 실행
 
 python 3.7 이상 버전 설치 후
