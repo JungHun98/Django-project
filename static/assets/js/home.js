@@ -15,22 +15,22 @@ var endcode;
 let code = '';
 
 $(document).ready(function () {
-    $('.route-wrap').hide()
-    getLocation().then(location => {
-        latitude = location['latitude']
-        longitude = location['longitude'];
-    }).then((arg) => {
-        leaf_map = L.map('map').setView([latitude, longitude], 15)
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 18}).addTo(leaf_map);    //tileLayer의 {s}는 서버 도메인 , {z},{x},{y}는 타일 지도의 위치, addTo 매소드로 map에 타일 지도를 추가
-        L.control.locate({
-            position: 'topleft',
-            strings: {
-                title: "Show me where I am, yo!"
-            }
-        }).addTo(leaf_map);
+    // $('.route-wrap').hide()
+    // getLocation().then(location => {
+    //     latitude = location['latitude']
+    //     longitude = location['longitude'];
+    // }).then((arg) => {
+    //     leaf_map = L.map('map').setView([latitude, longitude], 15)
+    //     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 18}).addTo(leaf_map);    //tileLayer의 {s}는 서버 도메인 , {z},{x},{y}는 타일 지도의 위치, addTo 매소드로 map에 타일 지도를 추가
+    //     L.control.locate({
+    //         position: 'topleft',
+    //         strings: {
+    //             title: "Show me where I am, yo!"
+    //         }
+    //     }).addTo(leaf_map);
 
 
-    });
+    // });
 })
 
 //클릭 마커 찍기
@@ -78,7 +78,7 @@ var shortestRoute = [];   //최단거리 좌표 정보
 var safeRoute = [];
 
 var input = document.getElementById("StartAddr");
-input.onclick = function () {
+input.onclick = function(){
     new daum.Postcode({
         oncomplete: function (data) {
             // 팝업에서 검색결과 항목을 클릭했을때 실행할 코드를 작성하는 부분입니다.
@@ -110,13 +110,11 @@ input.onclick = function () {
             //console.log(document.getElementById("StartAddr").value);
         }
     }).open();
-
-
 };
 
 
 var output = document.getElementById("EndAddr");
-output.onclick = function () {
+output.onclick = function(){
     new daum.Postcode({
         oncomplete: function (data) {
             var roadAddr = data.roadAddress; // 도로명 주소 변수
