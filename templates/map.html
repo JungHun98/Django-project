@@ -20,113 +20,14 @@
 <script src="https://apis.openapi.sk.com/tmap/jsv2?version=1&appKey=l7xx0540ab9b13084d30b44950c8a1b7f405"></script>
 
 <script defer src="../static/assets/js/map.js"></script>
+<script defer src="{% static 'assets/js/home.js' %}"></script>
+
 <script type="text/javascript">
     var userLatLng = "{% url 'content:getApi' %}";
     var setpointpage = "{% url 'content:getspotpoint' %}";
       // {# var pathfinder = "{% url 'pathfinder' %}"; #}
       // {# var saferoute = "{% url 'saferoute' %}"; #}
 
-</script>
-
-<script type="text/javascript">
-
-    var posOptions = {
-        enableHighAccuracy: false,
-        timeout: 10000,
-        maximumAge: 60000
-    };
-
-    console.log("{{userid}}");
-    function success(pos) {
-        var crd = pos.coords;
-        console.log('Your current position is:');
-        console.log('Latitude : ' + crd.latitude);
-        usrlat = crd.latitude;
-        console.log('Longitude: ' + crd.longitude);
-        usrlon = crd.longitude
-        console.log('More or less ' + crd.accuracy + ' meters.');
-
-        this.lat = crd.latitude;
-        this.lon = crd.longitude;
-        //alert(lat + " / " + lon);
-    };
-
-    function error(err) {
-        console.warn('ERROR(' + err.code + '): ' + err.message);
-        alert('ERROR(' + err.code + '): ' + err.message);
-    };
-
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(success, error, posOptions);
-    }
-    //  alert("내용부분 : " + this.lat + " / " + this.lon);
-    var _oldFetch = fetch;
-    var visible = true;
-    // Create our new version of the fetch function
-    window.fetch = function () {
-
-        // Create hooks
-        var fetchStart = new Event('fetchStart', { 'view': document, 'bubbles': true, 'cancelable': false });
-        var fetchEnd = new Event('fetchEnd', { 'view': document, 'bubbles': true, 'cancelable': false });
-
-        // Pass the supplied arguments to the real fetch function
-        var fetchCall = _oldFetch.apply(this, arguments);
-
-        // Trigger the fetchStart event
-        document.dispatchEvent(fetchStart);
-
-        fetchCall.then(function () {
-            // Trigger the fetchEnd event
-            document.dispatchEvent(fetchEnd);
-        }).catch(function () {
-            // Trigger the fetchEnd event
-            document.dispatchEvent(fetchEnd);
-        });
-
-        return fetchCall;
-    };
-
-    document.addEventListener('fetchStart', function () {
-        if ("{{userid}}" === "None") return;
-        const loader = document.querySelector('.preload');
-        const emoji = loader.querySelector('.emoji');
-        loader.style.display = "block";
-
-        const emojis = ["🕐", "🕜", "🕑", "🕝", "🕒", "🕞", "🕓", "🕟", "🕔", "🕠", "🕕", "🕡", "🕖", "🕢", "🕗", "🕣", "🕘", "🕤", "🕙", "🕥", "🕚", "🕦", "🕛", "🕧"];
-
-        const interval = 125;
-
-        const loadEmojis = (arr) => {
-            let inter = setInterval(() => {
-                if (visible) {
-                    emoji.innerText = arr[Math.floor(Math.random() * arr.length)];
-                } else {
-                    clearInterval(inter);
-                    document.querySelector('.preload').style.display = "none";
-                }
-                //console.log(Math.floor(Math.random() * arr.length))
-            }, 500);
-        }
-
-        const init = () => {
-            loadEmojis(emojis);
-        }
-        init();
-
-        let btns = document.querySelectorAll(".btn");
-        console.log(btns);
-        btns.forEach((btn) => {
-            btn.disabled = true;
-        });
-    });
-
-    document.addEventListener('fetchEnd', function () {
-        if ("{{userid}}" === "None") return;
-
-        visible = false;
-
-        alert("경로가 검색되었습니다.");
-    });    
 </script>
 
 {#출발 및 도착지#}

@@ -1,8 +1,73 @@
 "use strict"
-/**
- * @todo 경유지에서 출발지, 도착지 결정 알고리즘(TSP 사용하기)
- * 온전한 JSON으로 받아오기
- */
+//  alert("내용부분 : " + this.lat + " / " + this.lon);
+
+let _oldFetch = fetch;
+let visible = true;
+// Create our new version of the fetch function
+window.fetch = function () {
+
+  // Create hooks
+  let fetchStart = new Event('fetchStart', { 'view': document, 'bubbles': true, 'cancelable': false });
+  let fetchEnd = new Event('fetchEnd', { 'view': document, 'bubbles': true, 'cancelable': false });
+
+  // Pass the supplied arguments to the real fetch function
+  let fetchCall = _oldFetch.apply(this, arguments);
+
+  // Trigger the fetchStart event
+  document.dispatchEvent(fetchStart);
+
+  fetchCall.then(function () {
+    // Trigger the fetchEnd event
+    document.dispatchEvent(fetchEnd);
+  }).catch(function () {
+    // Trigger the fetchEnd event
+    document.dispatchEvent(fetchEnd);
+  });
+
+  return fetchCall;
+};
+
+document.addEventListener('fetchStart', function () {
+  if ("{{userid}}" === "None") return;
+  const loader = document.querySelector('.preload');
+  const emoji = loader.querySelector('.emoji');
+  loader.style.display = "block";
+
+  const emojis = ["🕐", "🕜", "🕑", "🕝", "🕒", "🕞", "🕓", "🕟", "🕔", "🕠", "🕕", "🕡", "🕖", "🕢", "🕗", "🕣", "🕘", "🕤", "🕙", "🕥", "🕚", "🕦", "🕛", "🕧"];
+
+  const interval = 125;
+
+  const loadEmojis = (arr) => {
+    let inter = setInterval(() => {
+      if (visible) {
+        emoji.innerText = arr[Math.floor(Math.random() * arr.length)];
+      } else {
+        clearInterval(inter);
+        document.querySelector('.preload').style.display = "none";
+      }
+      //console.log(Math.floor(Math.random() * arr.length))
+    }, 500);
+  }
+
+  const init = () => {
+    loadEmojis(emojis);
+  }
+  init();
+
+  let btns = document.querySelectorAll(".btn");
+  console.log(btns);
+  btns.forEach((btn) => {
+    btn.disabled = true;
+  });
+});
+
+document.addEventListener('fetchEnd', function () {
+  if ("{{userid}}" === "None") return;
+
+  visible = false;
+
+  alert("경로가 검색되었습니다.");
+});
 
 // 전역변수 감추기
 function init() {
@@ -24,19 +89,19 @@ function init() {
     console.error("지도 띄우기", error);
   }
 
-  function getMap(){
+  function getMap() {
     return map;
   }
 
-  function getResultMarkerArr(){
+  function getResultMarkerArr() {
     return resultMarkerArr;
   }
 
-  function getDrawInfoArr(){
+  function getDrawInfoArr() {
     return drawInfoArr;
   }
 
-  function getResultdrawArr(){
+  function getResultdrawArr() {
     return resultdrawArr;
   }
 
@@ -47,13 +112,13 @@ function init() {
         resultMarkerArr[i].setMap(null);
       }
     }
-  
+
     if (resultdrawArr.length > 0) {
       for (var i = 0; i < resultdrawArr.length; i++) {
         resultdrawArr[i].setMap(null);
       }
     }
-  
+
     drawInfoArr = [];
     resultMarkerArr = [];
     resultdrawArr = [];
@@ -85,10 +150,12 @@ function init() {
 // } catch (error) {
 //   console.error("지도 띄우기", error);
 // }
-debugger;
+
 const app = init();
 
-/* 길찾기 버튼 클릭 이벤트 */
+/** 길찾기 버튼 클릭 이벤트 
+경로 그리기, 지도 업데이트
+*/
 const searchRouteButton = document.querySelector("#btn_select");
 searchRouteButton.addEventListener('click', (event) => {
   app.resettingMap();
@@ -238,7 +305,7 @@ function drawRoute(path, color) {
  * @param {Array} points GPS정보배열 
 */
 function setMapBound(points) {
-  
+
   let maxLatLon = { 'lat': 0, 'lon': 0 };
   let minLatLon = { 'lat': 50, 'lon': 150 };
 
@@ -374,26 +441,6 @@ function mToKmString(m) {
   }
 
   return distanceString;
-}
-
-/** 지도에 표시된 기존 마커들과 경로를 clear하는 함수 */
-function resettingMap() {
-
-  if (resultMarkerArr.length > 0) {
-    for (var i = 0; i < resultMarkerArr.length; i++) {
-      resultMarkerArr[i].setMap(null);
-    }
-  }
-
-  if (resultdrawArr.length > 0) {
-    for (var i = 0; i < resultdrawArr.length; i++) {
-      resultdrawArr[i].setMap(null);
-    }
-  }
-
-  drawInfoArr = [];
-  resultMarkerArr = [];
-  resultdrawArr = [];
 }
 
 // initTamp();
