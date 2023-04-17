@@ -19,15 +19,15 @@
 <script defer src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script> <!-- 주소검색 api-->
 <script src="https://apis.openapi.sk.com/tmap/jsv2?version=1&appKey=l7xx0540ab9b13084d30b44950c8a1b7f405"></script>
 
-<script defer src="../static/assets/js/map.js"></script>
+<script defer src="../static/assets/js/map.js" data-userid="{{ userid }}"></script>
 <script defer src="{% static 'assets/js/home.js' %}"></script>
 
 <script type="text/javascript">
     var userLatLng = "{% url 'content:getApi' %}";
     var setpointpage = "{% url 'content:getspotpoint' %}";
+    console.log(userLatLng, setpointpage);
       // {# var pathfinder = "{% url 'pathfinder' %}"; #}
       // {# var saferoute = "{% url 'saferoute' %}"; #}
-
 </script>
 
 {#출발 및 도착지#}

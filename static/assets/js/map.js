@@ -3,6 +3,7 @@
 
 let _oldFetch = fetch;
 let visible = true;
+let userid = document.currentScript.dataset.userid;
 // Create our new version of the fetch function
 window.fetch = function () {
 
@@ -27,15 +28,13 @@ window.fetch = function () {
   return fetchCall;
 };
 
-document.addEventListener('fetchStart', function () {
-  if ("{{userid}}" === "None") return;
+function startFatch() {
+  if (userid === 'None') return;
   const loader = document.querySelector('.preload');
   const emoji = loader.querySelector('.emoji');
   loader.style.display = "block";
 
   const emojis = ["🕐", "🕜", "🕑", "🕝", "🕒", "🕞", "🕓", "🕟", "🕔", "🕠", "🕕", "🕡", "🕖", "🕢", "🕗", "🕣", "🕘", "🕤", "🕙", "🕥", "🕚", "🕦", "🕛", "🕧"];
-
-  const interval = 125;
 
   const loadEmojis = (arr) => {
     let inter = setInterval(() => {
@@ -55,19 +54,19 @@ document.addEventListener('fetchStart', function () {
   init();
 
   let btns = document.querySelectorAll(".btn");
-  console.log(btns);
+
   btns.forEach((btn) => {
     btn.disabled = true;
   });
-});
+}
 
-document.addEventListener('fetchEnd', function () {
-  if ("{{userid}}" === "None") return;
+function fetchEnd() {
+  if (userid === 'None') return;
 
   visible = false;
 
   alert("경로가 검색되었습니다.");
-});
+};
 
 // 전역변수 감추기
 function init() {
@@ -133,24 +132,6 @@ function init() {
   }
 }
 
-// let map;
-// let resultMarkerArr = [];
-// let drawInfoArr = [];
-// let resultdrawArr = [];
-
-// try {
-//   map = new Tmapv2.Map("map_div", {
-//     center: new Tmapv2.LatLng(37.49241689559544, 127.03171389453507),
-//     width: "100%",
-//     height: "80vh",
-//     zoom: 11,
-//     zoomControl: true,
-//     scrollwheel: true
-//   });
-// } catch (error) {
-//   console.error("지도 띄우기", error);
-// }
-
 const app = init();
 
 /** 길찾기 버튼 클릭 이벤트 
@@ -168,9 +149,11 @@ searchRouteButton.addEventListener('click', (event) => {
 
   let routeInfoArr = [];
 
+  startFatch();
   fetch("/getRoute")
     .then(response => response.text())
     .then((text) => {
+
       // 경로 그리기,마커 찍기, 지도 영역 설정
       try {
         routeInfo = JSON.parse(text);
@@ -212,8 +195,6 @@ searchRouteButton.addEventListener('click', (event) => {
       }
 
       // 중복제거
-      // route 객체를 하나로 만들기, 조건문 불필요
-      // view에서 데이터 포맷 변환, 통합해서 사용 할 수 있을듯 함
       updateMap(busPath, markers, boundPoints);
 
       return routeInfoArr
@@ -223,9 +204,51 @@ searchRouteButton.addEventListener('click', (event) => {
       createRouteInfoWindow(routeInfoArr[0], routeInfoArr[1], routeInfoArr[2])
     })
     .catch(console.log) // JSON데이터가 아닌 경우
-    .finally();
+    .finally(fetchEnd);
 });
 
+const { get, set } = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
+const inputs = document.querySelectorAll(".form-control");
+
+inputs.forEach((input) => {
+  Object.defineProperty(input, 'value', {
+    get() {
+      return get.call(this);
+    },
+    set(newVal) {
+
+      const options = {
+        method: 'GET',
+        headers: { accept: 'application/json', appKey: 'l7xx0540ab9b13084d30b44950c8a1b7f405' }
+      };
+      fetch('https://apis.openapi.sk.com/tmap/geo/fullAddrGeo?addressFlag=F00&version=1&fullAddr=' + newVal, options)
+        .then(response => response.json())
+        .then(response => response.coordinateInfo)
+        .then((resultInfo) => {
+          if (resultInfo?.coordinate) {
+            let map = app.getMap();
+            let coordinateInfo = resultInfo.coordinate[0]
+            let markerPosition = new Tmapv2.LatLng(Number(coordinateInfo.newLat), Number(coordinateInfo.newLon));
+
+            // 마커 올리기
+            let marker = new Tmapv2.Marker(
+              {
+                position: markerPosition,
+                icon: "http://tmapapi.sktelecom.com/upload/tmap/marker/pin_b_m_a.png",
+                iconSize: new Tmapv2.Size(
+                  24, 38),
+                map: map
+              });
+            map.setCenter(markerPosition);
+            map.setZoom(18);
+            app.getResultMarkerArr().push(marker);
+          }
+        })
+        .catch(err => console.error(err));
+      return set.call(this, newVal);
+    }
+  });
+})
 /**
  * 매개변수를 바탕으로 지도를 업데이트하는 함수
  * @param {Array} path 좌표배열 
@@ -288,7 +311,7 @@ function drawRoute(path, color) {
   path.forEach((coordinate) => {
     let latLng = new Tmapv2.LatLng(coordinate[1], coordinate[0]);
     drawInfoArr.push(latLng);
-  })
+  });
 
   routeLine = new Tmapv2.Polyline({
     path: drawInfoArr,

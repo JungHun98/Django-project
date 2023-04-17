@@ -10,50 +10,10 @@ var start_x;
 var start_y;
 var resultArray = []; //출발지, 목적지 좌표
 
+
 var startcode;
 var endcode;
 let code = '';
-
-$(document).ready(function () {
-    // $('.route-wrap').hide()
-    // getLocation().then(location => {
-    //     latitude = location['latitude']
-    //     longitude = location['longitude'];
-    // }).then((arg) => {
-    //     leaf_map = L.map('map').setView([latitude, longitude], 15)
-    //     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 18}).addTo(leaf_map);    //tileLayer의 {s}는 서버 도메인 , {z},{x},{y}는 타일 지도의 위치, addTo 매소드로 map에 타일 지도를 추가
-    //     L.control.locate({
-    //         position: 'topleft',
-    //         strings: {
-    //             title: "Show me where I am, yo!"
-    //         }
-    //     }).addTo(leaf_map);
-
-
-    // });
-})
-
-//클릭 마커 찍기
-function getmarker() {
-    leaf_map.addEventListener('click', function (e) {
-        console.log(e.latlng.lat, e.latlng.lng);
-        L.marker([e.latlng.lat, e.latlng.lng]).addTo(leaf_map);
-    })
-    $('#StartAddr').text(e.latlng.lat + ' ' + e.latlng.lng);
-    $('#StartAddr').disabled();
-}
-
-// 현재의 위치 정보를 가져온다.
-function getLocation() {
-    return new Promise(resolve => {
-        navigator.geolocation.watchPosition(function (position) {
-            return resolve({
-                latitude: position.coords.latitude,
-                longitude: position.coords.longitude,
-            });
-        });
-    });
-}
 
 //csrf token
 function getCookie(name) {
@@ -82,7 +42,7 @@ input.onclick = function(){
     new daum.Postcode({
         oncomplete: function (data) {
             // 팝업에서 검색결과 항목을 클릭했을때 실행할 코드를 작성하는 부분입니다.
-
+            
             // 도로명 주소의 노출 규칙에 따라 주소를 표시한다.
             // 내려오는 변수가 값이 없는 경우엔 공백('')값을 가지므로, 이를 참고하여 분기 한다.
             var roadAddr = data.roadAddress; // 도로명 주소 변수
@@ -108,7 +68,7 @@ input.onclick = function(){
             // document.getElementById("sample4_jibunAddress").value = data.jibunAddress;
             document.getElementById("StartAddr").value = roadAddr;
             //console.log(document.getElementById("StartAddr").value);
-        }
+        }  
     }).open();
 };
 
@@ -229,64 +189,5 @@ $("#find_botton").click(function () {
                 console.log(error);
             }
         });
-        //안전경로
-        $.ajax({
-            method: "POST",
-            url: saferoute,
-            raditional: true,
-            data: {
-                "startX": resultArray['startaddr'][1],
-                "startY": resultArray['startaddr'][0],
-                "endX": resultArray['endaddr'][1],
-                "endY": resultArray['endaddr'][0],
-                'csrfmiddlewaretoken': csrftoken,
-            },
-            success: (response) => {
-                safeRoute = response['result']
-                var safeDistance = "총 거리 : " + (response['totalDistance']).toFixed(1) + "km";
-                var safeTime = " 총 시간 : " + (response['totalTime']).toFixed(0) + "분";
-
-                $('#safe-route').text(safeDistance)
-                $('#safe-time').text(safeTime)
-
-                $('.route-wrap').show();
-                console.log(safeRoute)
-            },
-            fail: (error) => {
-                console.log(error);
-            }
-        }).then((arg) => {
-            // mapping safe
-
-            // markers.L.clearLayers();
-            // line.L.clearLayers();
-
-            if (start_markers != undefined) {
-                leaf_map.removeLayer(end_markers);
-                leaf_map.removeLayer(start_markers)
-            }
-            if (short_lineline != undefined) {
-                leaf_map.removeLayer(short_line);
-                leaf_map.removeLayer(safe_line);
-            }
-            leaf_map.setView([resultArray['startaddr'][0], resultArray['startaddr'][1]], 16)
-
-            start_markers = L.marker([resultArray['startaddr'][0], resultArray['startaddr'][1]]).addTo(leaf_map);
-            end_markers = L.marker([resultArray['endaddr'][0], resultArray['endaddr'][1]]).addTo(leaf_map);
-
-
-            //최단 route
-            short_line = L.polyline(shortestRoute, {
-                color: "red",
-                weight: 5
-            }).addTo(leaf_map);
-
-            //안전 route
-            safe_line = L.polyline(safeRoute, {
-                weight: 5
-            }).addTo(leaf_map);
-        });
     });
-
-
 });
