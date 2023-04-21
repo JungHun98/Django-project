@@ -1627,13 +1627,13 @@ section {
     display: flex;
     justify-content: center;
     width: 600px;
-
 }
 
 html, body {
     height: 100%;
 }
 
+/* map */
 #map {
     z-index: 0;
     position: relative;
@@ -1653,6 +1653,7 @@ html, body {
 }
 
 .input-wrap {
+    max-width: 600px;
     width: 80%;
 }
 
@@ -1695,6 +1696,23 @@ html, body {
     background-color: rgba(255, 255, 255, 0.7);
 }
 
+@media (max-width: 1200px) {
+    
+    #route_container{
+        bottom: 0;
+    }
+    
+}
+
+@media (max-width: 800px){
+    #pathForm{
+        display: block;
+        width: 80vw;
+    }
+    .input-wrap{
+        width: 97%;
+    }
+}
 #route_container::-webkit-scrollbar { 
     display: none;  /* Safari and Chrome */
 }
@@ -1719,4 +1737,23 @@ html, body {
     width: 100%;
     text-align: left;
     margin: 4px;
+}
+
+#bound_button{
+    position: absolute;
+    z-index: 1;
+    bottom: 8%;
+    right: 3%;
+}
+
+#bound_button button{
+    width: 30px;
+    height: 30px;
+    background-color: white;
+    border-radius: 100%;
+    padding: 0;
+}
+
+#bound_button button:hover{
+    color: blue;
 }

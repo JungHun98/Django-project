@@ -3,7 +3,6 @@
 
 let _oldFetch = fetch;
 let visible = true;
-let userid = document.currentScript.dataset.userid;
 // Create our new version of the fetch function
 window.fetch = function () {
 
@@ -29,7 +28,7 @@ window.fetch = function () {
 };
 
 function startFatch() {
-  if (userid === 'None') return;
+  if (app.getUserId() === 'None') return;
   const loader = document.querySelector('.preload');
   const emoji = loader.querySelector('.emoji');
   loader.style.display = "block";
@@ -61,7 +60,7 @@ function startFatch() {
 }
 
 function fetchEnd() {
-  if (userid === 'None') return;
+  if (app.getUserId() === 'None') return;
 
   visible = false;
 
@@ -74,8 +73,10 @@ function init() {
   let resultMarkerArr = [];
   let drawInfoArr = [];
   let resultdrawArr = [];
+  let userId = document.currentScript.dataset.userid;
 
   try {
+    // 지도 SSR로 바꿔보기
     map = new Tmapv2.Map("map_div", {
       center: new Tmapv2.LatLng(37.49241689559544, 127.03171389453507),
       width: "100%",
@@ -84,6 +85,7 @@ function init() {
       zoomControl: true,
       scrollwheel: true
     });
+    console.log(map);
   } catch (error) {
     console.error("지도 띄우기", error);
   }
@@ -104,6 +106,10 @@ function init() {
     return resultdrawArr;
   }
 
+  function getUserId() {
+    return userId;
+  }
+  
   function resettingMap() {
 
     if (resultMarkerArr.length > 0) {
@@ -128,6 +134,7 @@ function init() {
     getResultMarkerArr: getResultMarkerArr,
     getDrawInfoArr: getDrawInfoArr,
     getResultdrawArr: getResultdrawArr,
+    getUserId: getUserId,
     resettingMap: resettingMap
   }
 }
@@ -153,55 +160,57 @@ searchRouteButton.addEventListener('click', (event) => {
   fetch("/getRoute")
     .then(response => response.text())
     .then((text) => {
-
       // 경로 그리기,마커 찍기, 지도 영역 설정
       try {
         routeInfo = JSON.parse(text);
+        
+        if (routeInfo.walking) {
+          let busTime = routeInfo.bus.time.reduce((a, b) => a + b, 0);
+          let busDistance = routeInfo.bus.distance.reduce((a, b) => a + b, 0);
+  
+          routeInfo.walking.time.splice(1, 0, busTime);
+          routeInfo.walking.distance.splice(1, 0, busDistance);
+  
+          markers = JSON.parse(JSON.stringify(routeInfo.walking.points)); // 출발지-탑승지
+          markers.splice(2, 0, ...routeInfo.bus.viaPoints); // 출발지 - 지나는 버스정류장 - 도착지
+  
+          let walkPath = routeInfo.walking.path;
+          walkPath.forEach((path) => {
+            drawRoute(path, "#ff0000");
+          })
+  
+          busPath = routeInfo.bus.path;
+          boundPoints = routeInfo.walking.points;
+  
+          // point, time, distance
+          routeInfoArr.push(routeInfo.walking.points);
+          routeInfoArr.push(routeInfo.walking.time);
+          routeInfoArr.push(routeInfo.walking.distance);
+        }
+        else {
+          busPath = routeInfo.path;
+          markers = routeInfo.viaPoints;
+          boundPoints = routeInfo.viaPoints;
+  
+          routeInfoArr.push(routeInfo.viaPoints);
+          routeInfoArr.push(routeInfo.time);
+          routeInfoArr.push(routeInfo.distance);
+        }
+  
+        // 중복제거
+        updateMap(busPath, markers, boundPoints);
+        return routeInfoArr
       } catch (e) {
         window.location.href = text;
+        return undefined;
       }
-
-      if (routeInfo.walking) {
-        let busTime = routeInfo.bus.time.reduce((a, b) => a + b, 0);
-        let busDistance = routeInfo.bus.distance.reduce((a, b) => a + b, 0);
-
-        routeInfo.walking.time.splice(1, 0, busTime);
-        routeInfo.walking.distance.splice(1, 0, busDistance);
-
-        markers = JSON.parse(JSON.stringify(routeInfo.walking.points)); // 출발지-탑승지
-        markers.splice(2, 0, ...routeInfo.bus.viaPoints); // 출발지 - 지나는 버스정류장 - 도착지
-
-        let walkPath = routeInfo.walking.path;
-        walkPath.forEach((path) => {
-          drawRoute(path, "#ff0000");
-        })
-
-        busPath = routeInfo.bus.path;
-        boundPoints = routeInfo.walking.points;
-
-        // point, time, distance
-        routeInfoArr.push(routeInfo.walking.points);
-        routeInfoArr.push(routeInfo.walking.time);
-        routeInfoArr.push(routeInfo.walking.distance);
-      }
-      else {
-        busPath = routeInfo.path;
-        markers = routeInfo.viaPoints;
-        boundPoints = routeInfo.viaPoints;
-
-        routeInfoArr.push(routeInfo.viaPoints);
-        routeInfoArr.push(routeInfo.time);
-        routeInfoArr.push(routeInfo.distance);
-      }
-
-      // 중복제거
-      updateMap(busPath, markers, boundPoints);
-
-      return routeInfoArr
     })
     .then((routeInfoArr) => {
       // 경로 인터페이스 생성
-      createRouteInfoWindow(routeInfoArr[0], routeInfoArr[1], routeInfoArr[2])
+      if(routeInfoArr){
+        createRouteInfoWindow(routeInfoArr[0], routeInfoArr[1], routeInfoArr[2])
+        createSetBoundButton(routeInfoArr[0]);
+      }
     })
     .catch(console.log) // JSON데이터가 아닌 경우
     .finally(fetchEnd);
@@ -210,11 +219,19 @@ searchRouteButton.addEventListener('click', (event) => {
 const { get, set } = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
 const inputs = document.querySelectorAll(".form-control");
 
+/** 
+ * map input tag value 속성 getter와 setter 커스텀
+ * input.value를 동적으로 변경하면 change event가 발생하지 않음
+*/
 inputs.forEach((input) => {
   Object.defineProperty(input, 'value', {
     get() {
       return get.call(this);
     },
+    /**
+     * 사용자가 주소 입력시 해당하는 위치에 마커를 표시하고 지도의 중심좌표 이동 
+     * @param {string} newVal 도로명 주소
+     */
     set(newVal) {
 
       const options = {
@@ -225,6 +242,7 @@ inputs.forEach((input) => {
         .then(response => response.json())
         .then(response => response.coordinateInfo)
         .then((resultInfo) => {
+          console.log('주소입력');
           if (resultInfo?.coordinate) {
             let map = app.getMap();
             let coordinateInfo = resultInfo.coordinate[0]
@@ -243,8 +261,13 @@ inputs.forEach((input) => {
             map.setZoom(18);
             app.getResultMarkerArr().push(marker);
           }
+          else{
+            alert('주소를 다시 입력해주세요.');
+          }
         })
         .catch(err => console.error(err));
+
+      // this -> input tag domelement
       return set.call(this, newVal);
     }
   });
@@ -466,4 +489,13 @@ function mToKmString(m) {
   return distanceString;
 }
 
+function createSetBoundButton(boundPoints){
+  const buttonCon = document.querySelector("#bound_button");
+  let button = document.createElement('button');
+  button.addEventListener('click', () => {
+    setMapBound(boundPoints);
+  });
+  button.innerHTML = '<i class="fa-solid fa-location-crosshairs"></i>';
+  buttonCon.appendChild(button);
+}
 // initTamp();
