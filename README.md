@@ -106,7 +106,8 @@
 │ │  ├─ js
 │ │  │  ├─ home.js
 │ │  │  ├─ main.js
-│ │  │  └─ map.js : 지도 페이지 js파일
+│ │  │  ├─ map.mjs : map.js 모듈
+| |  |  ├─ map.js : 지도 페이지 js파일
 │ │  │  └─ Readme.txt
 │ │  ├─ scss
 │ │  |
