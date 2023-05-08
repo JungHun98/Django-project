@@ -21,7 +21,7 @@
 
 <script src="https://kit.fontawesome.com/5a0c56dadc.js" crossorigin="anonymous"></script>
 
-<script defer src="../static/assets/js/map.js" data-userid="{{ userid }}"></script>
+<script type="module" src="../static/assets/js/map.js"></script>
 <script defer src="{% static 'assets/js/home.js' %}"></script>
 
 <script type="text/javascript">
@@ -32,7 +32,7 @@
 </script>
 
 {#출발 및 도착지#}
-<body>
+<body data-userid = "{{userid}}">
 
 <div class='inputaddr'>
     <div id="pathForm">

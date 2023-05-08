@@ -1,4 +1,7 @@
+
 "use strict"
+
+
 let latitude = 0;
 let longitude = 0;
 var leaf_map;

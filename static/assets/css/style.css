@@ -1713,6 +1713,7 @@ html, body {
         width: 97%;
     }
 }
+
 #route_container::-webkit-scrollbar { 
     display: none;  /* Safari and Chrome */
 }
