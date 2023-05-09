@@ -4,12 +4,18 @@ let visible = true;
 
 function startFatch() {
   if (app.getUserId() === 'None') return;
+    
   const loader = document.querySelector('.preload');
   const emoji = loader.querySelector('.emoji');
+
   loader.style.display = "block";
+  console.log(loader);
 
   const emojis = ["🕐", "🕜", "🕑", "🕝", "🕒", "🕞", "🕓", "🕟", "🕔", "🕠", "🕕", "🕡", "🕖", "🕢", "🕗", "🕣", "🕘", "🕤", "🕙", "🕥", "🕚", "🕦", "🕛", "🕧"];
 
+  /* setInterval은 비동기 함수이기 때문에 then안에서 실행하게 되면 현재 프로미스의 실행 컨텍스트가 완료 될 때 까지
+     동작하지 않게됨. 따라서 프로미스 이전에 미리 실행을 시켜야 한다.
+  */
   const loadEmojis = (arr) => {
     let inter = setInterval(() => {
       if (visible) {
@@ -38,8 +44,6 @@ function fetchEnd() {
   if (app.getUserId() === 'None') return;
 
   visible = false;
-
-  alert("경로가 검색되었습니다.");
 };
 
 // 전역변수 감추기

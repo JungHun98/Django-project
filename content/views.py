@@ -60,6 +60,9 @@ def map(request):
 def SetStartEnd(bus_group):
     print(bus_group)
     print(set)
+    global start
+    global end
+
     c = 0
     for bus1 in Bus_Stop.objects.filter(bus_group=bus_group, start_or_end=0):
         for bus2 in Bus_Stop.objects.filter(bus_group=bus_group, start_or_end=1):
@@ -71,6 +74,9 @@ def SetStartEnd(bus_group):
                 start = bus1
                 end = bus2
                 print(end)
+    
+    if start == 0 or end == 0:
+        return None
 
     start.first = 1
     start.save()
@@ -341,6 +347,10 @@ def getDriverRoute(userid):
     user = Content.objects.get(user_id=userid)
     print('getdriver')
     first_end = SetStartEnd(user.bus_group)
+
+    if first_end is None:
+        return None
+    
     print('퍼스트엔드')
     print(first_end)
     # 클러스터링 데이터
@@ -375,7 +385,11 @@ def getRoute(request):
         user_type = "none"
         return HttpResponse("/user/login")
 
-    getDriverRoute(userid)
+    route = getDriverRoute(userid)
+    
+    if route is None:
+        return HttpResponse("None")
+
     if user_type == "passenger":
         return userRoute(userid)
     else:
@@ -414,7 +428,7 @@ def GetSpotPoint(request):
         if ClusterExist(userid) == 2:
             first_start_clustering(userid)
             first_end_clustering(userid)
-        else:
+        elif ClusterExist(userid) == 1:
             start_clustering(userid)
             end_clustering(userid)
 

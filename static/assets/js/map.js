@@ -18,11 +18,19 @@ searchRouteButton.addEventListener('click', (event) => {
 
   let routeInfoArr = [];
 
-  Map.startFatch();
+  if(document.body.dataset.userid !== "None"){
+    Map.startFatch();
+  }
+
   fetch("/getRoute")
     .then(response => response.text())
     .then((text) => {
+      if(text === "None"){
+        alert("경로를 만들기에 같은 행정동의 이용자 수가 부족합니다.")
+        throw Error('인원 부족');
+      }
       // 경로 그리기,마커 찍기, 지도 영역 설정
+
       try {
         routeInfo = JSON.parse(text);
         
@@ -77,6 +85,8 @@ searchRouteButton.addEventListener('click', (event) => {
 
         // createRouteInfoWindow(routeInfoArr[0], routeInfoArr[1], routeInfoArr[2])
         // createSetBoundButton(routeInfoArr[0]);
+        alert("경로가 검색되었습니다.");
+
       }
     })
     .catch(console.log) // JSON데이터가 아닌 경우
