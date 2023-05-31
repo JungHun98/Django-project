@@ -4,7 +4,7 @@ let visible = true;
 
 function startFatch() {
   if (app.getUserId() === 'None') return;
-    
+
   const loader = document.querySelector('.preload');
   const emoji = loader.querySelector('.emoji');
 
@@ -50,8 +50,7 @@ function fetchEnd() {
 function init() {
   let map;
   let resultMarkerArr = [];
-  let drawInfoArr = [];
-  let resultdrawArr = [];
+  let resultRouteArr = [];
   let userId = document.body.dataset.userid;
 
   try {
@@ -63,57 +62,70 @@ function init() {
       zoomControl: true,
       scrollwheel: true
     });
-  
+    
+    console.log(map);
   } catch (error) {
     console.error("지도 띄우기", error);
   }
 
-  function getMap() {
+  let getMap = function() {
     return map;
   }
 
-  function getResultMarkerArr() {
+  let getResultMarkerArr = function () {
     return resultMarkerArr;
   }
 
-  function getDrawInfoArr() {
-    return drawInfoArr;
+  let getResultRouteArr = function () {
+    return resultRouteArr;
   }
 
-  function getResultdrawArr() {
-    return resultdrawArr;
-  }
-
-  function getUserId() {
+  let getUserId = function() {
     return userId;
   }
 
-  function resettingMap() {
-
-    if (resultMarkerArr.length > 0) {
-      for (var i = 0; i < resultMarkerArr.length; i++) {
+  let resettingMap = function() {
+    if (resultMarkerArr) {
+      for (let i = 0; i < resultMarkerArr.length; i++) {   
+        resultMarkerArr[i]._elementBounds = null;
         resultMarkerArr[i].setMap(null);
       }
     }
 
-    if (resultdrawArr.length > 0) {
-      for (var i = 0; i < resultdrawArr.length; i++) {
-        resultdrawArr[i].setMap(null);
+    if (resultRouteArr) {
+      for (var i = 0; i < resultRouteArr.length; i++) {
+
+        for (let index = 0; index < resultRouteArr[i]._shape_data.path.length; index++) {
+          resultRouteArr[i]._shape_data.path[index] = null;
+          resultRouteArr[i]._shape_data.pathE7[index] = null;
+        }
+        resultRouteArr[i]._elementBounds = null;
+        resultRouteArr[i].setMap(null);
       }
     }
 
-    drawInfoArr = [];
     resultMarkerArr = [];
-    resultdrawArr = [];
+    resultRouteArr = [];
+  }
+
+  const clear = function() {
+    resettingMap();
+    getMap = null;
+    getResultMarkerArr = null;
+    getResultRouteArr = null;
+    getUserId = null;
+    resettingMap = null;
+    map.destroy();
+    delete window.Tmapv2;
   }
 
   return {
-    getMap: getMap,
-    getResultMarkerArr: getResultMarkerArr,
-    getDrawInfoArr: getDrawInfoArr,
-    getResultdrawArr: getResultdrawArr,
-    getUserId: getUserId,
-    resettingMap: resettingMap
+    getMap,
+    getResultMarkerArr,
+    getResultRouteArr,
+    getUserId,
+    resettingMap,
+    clear
   }
 }
 
@@ -167,14 +179,14 @@ function setMarker(points) {
 
 /**
  * 경로를 전달한 색상으로 지도에 표시
- * @param {Array} path 경로
- * @param {string} color 색상
+ * @param {Array} path 경로[[위도, 경도] ... ]
+ * @param {String} color 색상
  */
 function drawRoute(path, color) {
   let drawInfoArr = [];
   let routeLine;
   const map = app.getMap();
-  const resultdrawArr = app.getResultdrawArr();
+  const resultdrawArr = app.getResultRouteArr();
 
   path.forEach((coordinate) => {
     let latLng = new Tmapv2.LatLng(coordinate[1], coordinate[0]);
@@ -287,6 +299,7 @@ function createRouteInfoWindow(pointArray, timeArray, distanceArray) {
       let coord = new Tmapv2.LatLng(route.dataset.lat, route.dataset.lon);
       map.setCenter(coord);
       map.setZoom(15);
+      coord = null;
     });
 
     route_container.appendChild(route);
@@ -345,7 +358,7 @@ function mToKmString(m) {
   return distanceString;
 }
 
-const app = init();
+let app = init();
 
 export const Map = {
   state: app,
