@@ -105,7 +105,7 @@ def getUsrLatLng(request):
 # 위도 경도 => 근처 버스정류장 정보 return
 # parameter : 클러스터링한 위도 경도(문자열)
 def get_around_busstop(lat, lng):
-    apiUrl = "https://apis.openapi.sk.com/tmap/pois/search/around?version=1&centerLon=" + lng + "&centerLat=" + lat + "&categories=주차장&page=1&count=1&radius=1&reqCoordType=WGS84GEO&resCoordType=WGS84GEO&multiPoint=N&sort=distance"
+    apiUrl = "https://apis.openapi.sk.com/tmap/pois/search/around?version=1&centerLon=" + lng + "&centerLat=" + lat + "&categories=버스정류장&page=1&count=1&radius=1&reqCoordType=WGS84GEO&resCoordType=WGS84GEO&multiPoint=N&sort=distance"
 
     response = requests.get(apiUrl, headers=headers)
     # 가장 가까운 버스정류장 정보

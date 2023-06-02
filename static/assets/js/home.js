@@ -99,7 +99,6 @@ $("#find_botton").click(function () {
     code = startcode + endcode;
     console.log(code);
 
-
     //출발지 목적지 주소 -> 좌표변환
     new Promise((succ, fail) => {
         $.ajax({

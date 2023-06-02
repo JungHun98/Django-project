@@ -1,5 +1,5 @@
 "use strict"
-import {Map} from './map.mjs'
+import { Map } from './map.mjs'
 
 const app = Map.state;
 
@@ -45,8 +45,8 @@ searchRouteButton.addEventListener('click', (event) => {
           markers.splice(2, 0, ...routeInfo.bus.viaPoints); // 출발지 - 지나는 버스정류장 - 도착지
   
           let walkPath = routeInfo.walking.path;
-          walkPath.forEach((path) => {
-            Map.drawRoute(path, "#ff0000");
+          walkPath.forEach((elem) => {
+            Map.drawRoute(elem, "#ff0000");
             // drawRoute(path, "#ff0000");
           })
   
@@ -73,7 +73,8 @@ searchRouteButton.addEventListener('click', (event) => {
         Map.updateMap(busPath, markers, boundPoints);
         return routeInfoArr
       } catch (e) {
-        window.location.href = text;
+        console.log(e);
+        // window.location.href = text;
         return undefined;
       }
     })
@@ -86,7 +87,9 @@ searchRouteButton.addEventListener('click', (event) => {
         // createRouteInfoWindow(routeInfoArr[0], routeInfoArr[1], routeInfoArr[2])
         // createSetBoundButton(routeInfoArr[0]);
         alert("경로가 검색되었습니다.");
-
+        console.log(Map.state.getResultRouteArr());
+        console.log(Map.state.getResultMarkerArr());
+        console.log(Map.state.getMap());
       }
     })
     .catch(console.log) // JSON데이터가 아닌 경우
@@ -149,5 +152,10 @@ inputs.forEach((input) => {
     }
   });
 })
-
 // initTamp();
+
+window.addEventListener("beforeunload", (e) => {
+  console.log('나가기');
+  app.resettingMap();
+  app.clear();
+})
