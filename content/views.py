@@ -59,6 +59,10 @@ def map(request):
 
 def SetStartEnd(bus_group):
     print(bus_group)
+    
+    if not bus_group:
+        return None
+    
     print(set)
     global start
     global end
@@ -74,9 +78,6 @@ def SetStartEnd(bus_group):
                 start = bus1
                 end = bus2
                 print(end)
-    
-    if start == 0 or end == 0:
-        return None
 
     start.first = 1
     start.save()

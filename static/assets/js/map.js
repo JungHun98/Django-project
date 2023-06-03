@@ -74,7 +74,7 @@ searchRouteButton.addEventListener('click', (event) => {
         return routeInfoArr
       } catch (e) {
         console.log(e);
-        // window.location.href = text;
+        window.location.href = text;
         return undefined;
       }
     })
@@ -87,9 +87,9 @@ searchRouteButton.addEventListener('click', (event) => {
         // createRouteInfoWindow(routeInfoArr[0], routeInfoArr[1], routeInfoArr[2])
         // createSetBoundButton(routeInfoArr[0]);
         alert("경로가 검색되었습니다.");
-        console.log(Map.state.getResultRouteArr());
-        console.log(Map.state.getResultMarkerArr());
-        console.log(Map.state.getMap());
+        // console.log(Map.state.getResultRouteArr());
+        // console.log(Map.state.getResultMarkerArr());
+        // console.log(Map.state.getMap());
       }
     })
     .catch(console.log) // JSON데이터가 아닌 경우
