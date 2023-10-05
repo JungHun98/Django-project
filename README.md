@@ -27,6 +27,10 @@
 
 서비스 링크 https://port-0-django-project-refactoring-dcse2blie0oz62.sel4.cloudtype.app/
 
+> 테스트 할 수 있는 Sample ID입니다.
+> 
+> ID: a10, Passwd: ehflehfl
+
 [구현 부분 영상](https://youtu.be/2uMvvIf_i0A)
 
 ## 주요 기능
